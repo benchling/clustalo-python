@@ -20,7 +20,7 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     // Required
     PyObject *inputDict;
     // Optional
-    int seqtype = SEQTYPE_UNKNOWN;
+    int seqtype = SEQTYPE_DNA;
     PyObject *mbedGuideTree = NULL;
     PyObject *mbedIteration = NULL;
     int numCombinedIterations = rAlnOpts.iNumIterations;
@@ -58,7 +58,6 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
         case SEQTYPE_DNA:
         case SEQTYPE_RNA:
         case SEQTYPE_PROTEIN:
-        case SEQTYPE_UNKNOWN:
             prMSeq->seqtype = seqtype;
             break;
         default:
@@ -77,7 +76,22 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     PyObject *key, *value;
     Py_ssize_t pos = 0;
     while (PyDict_Next(inputDict, &pos, &key, &value)) {
-        AddSeq(&prMSeq, PyString_AsString(key), PyString_AsString(value));
+        char *seq = PyString_AsString(value);
+        // Sanitize sequence.
+        int seqPos;
+        for (seqPos = 0; seqPos < (int)strlen(seq); seqPos++) {
+            char *res = &(seq[seqPos]);
+            if (isgap(*res))
+                continue;
+            if (prMSeq->seqtype == SEQTYPE_PROTEIN && strchr(AMINO_ALPHABET, toupper(*res)) == NULL) {
+                *res = AMINOACID_ANY;
+            } else if (prMSeq->seqtype==SEQTYPE_DNA && strchr(DNA_ALPHABET, toupper(*res)) == NULL) {
+                *res = NUCLEOTIDE_ANY;
+            } else if (prMSeq->seqtype==SEQTYPE_RNA && strchr(RNA_ALPHABET, toupper(*res)) == NULL) {
+                *res = NUCLEOTIDE_ANY;
+            }
+        }
+        AddSeq(&prMSeq, PyString_AsString(key), seq);
     }
 
     // Perform the alignment.
@@ -91,7 +105,7 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     // Return the aligned results in a dict.
     PyObject *returnDict = PyDict_New();
     int idx;
-    for (idx=0; idx<prMSeq->nseqs; idx++) {
+    for (idx = 0; idx < prMSeq->nseqs; idx++) {
         const char *key = prMSeq->sqinfo[idx].name;
         PyObject *value = PyString_FromString(prMSeq->seq[idx]);
         PyDict_SetItemString(returnDict, key, value);
