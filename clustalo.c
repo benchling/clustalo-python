@@ -2,7 +2,7 @@
 #include <clustal-omega.h>
 
 static PyObject *
-_clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
+clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
 {
     mseq_t *prMSeq = NULL;
 
@@ -93,6 +93,10 @@ _clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
         }
         AddSeq(&prMSeq, PyString_AsString(key), seq);
     }
+    // Can't align with only 1 sequence.
+    if (prMSeq->nseqs <= 1) {
+        return PyDict_Copy(inputDict);
+    }
 
     // Perform the alignment.
     int rv;
@@ -117,14 +121,29 @@ _clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
 }
 
 static PyMethodDef ClustaloMethods[] = {
-    {"clustalo",  (PyCFunction)_clustalo_clustalo, METH_VARARGS | METH_KEYWORDS, "Executes clustal omega."},
+    {"clustalo",  (PyCFunction)clustalo_clustalo, METH_VARARGS | METH_KEYWORDS,
+     "Runs clustal omega and returns a dictionary of sequence_named => aligned_bases ('_' for gaps)"
+     "If timeout is reached, returns None"
+     ""
+     "Arguments:"
+     "data -- dictionary of sequence_name => bases"
+     ""
+     "Optional arguments:"
+     "timeout -- maximum time (seconds) before aborting"
+     "seqtype -- should be one of clustalo.DNA, clustalo.RNA, or clustalo.PROTEIN"
+     "mbed_guide_tree -- whether mBed-like clustering guide tree should be used"
+     "mbed_iteration -- whether mBed-like clustering iteration should be used"
+     "num_combined_iterations -- number of (combined guide-tree/HMM) iterations"
+     "max_guidetree_iterations -- max guide tree iterations within combined iterations"
+     "max_hmm_iterations -- max HMM iterations within combined iterations"
+     "num_threads -- number of threads to use (requires libclustalo compiled with OpenMP)"},
     {NULL, NULL, 0, NULL}
 };
 
 PyMODINIT_FUNC
-init_clustalo(void)
+initclustalo(void)
 {
-    PyObject *module = Py_InitModule("_clustalo", ClustaloMethods);
+    PyObject *module = Py_InitModule("clustalo", ClustaloMethods);
     PyModule_AddIntConstant(module, "DNA", SEQTYPE_DNA);
     PyModule_AddIntConstant(module, "RNA", SEQTYPE_RNA);
     PyModule_AddIntConstant(module, "PROTEIN", SEQTYPE_PROTEIN);

@@ -1,7 +1,7 @@
 from distutils.core import setup, Extension
 
-module = Extension('_clustalo',
-                   sources = ['clustalo/clustalo.c'],
+module = Extension('clustalo',
+                   sources = ['clustalo.c'],
                    include_dirs=['/usr/include/clustalo', '/usr/local/include/clustalo'],
                    libraries=['clustalo', 'stdc++', 'gomp'],
                    extra_compile_args=['-fopenmp'])
@@ -12,5 +12,4 @@ setup(name='clustalo',
       author='Joshua Ma',
       author_email='josh@benchling.com',
       url='https://github.com/benchling/clustalo-python',
-      packages=['clustalo'],
       ext_modules=[module])
