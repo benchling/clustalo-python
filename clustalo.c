@@ -1,12 +1,12 @@
 #include <Python.h>
-#include "clustal-omega.h"
+#include <omp.h>
+#include <clustal-omega.h>
 
 static PyObject *
 clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
 {
     mseq_t *prMSeq = NULL;
-    // TODO Support openmp via omp_get_max_threads();
-    int numThreads = 1;
+    int numThreads = omp_get_max_threads();
 
     LogDefaultSetup(&rLog);
     LogMuteAll(&rLog);
@@ -80,10 +80,12 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     }
 
     // Perform the alignment.
+    Py_BEGIN_ALLOW_THREADS
     if (Align(prMSeq, NULL, &rAlnOpts)) {
         // TODO SET ERROR.
         return NULL;
     }
+    Py_END_ALLOW_THREADS
 
     // Return the aligned results in a dict.
     PyObject *returnDict = PyDict_New();
