@@ -1,17 +1,13 @@
 #include <Python.h>
-#include <omp.h>
 #include <clustal-omega.h>
 
 static PyObject *
 clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
 {
     mseq_t *prMSeq = NULL;
-    int numThreads = omp_get_max_threads();
 
     LogDefaultSetup(&rLog);
     LogMuteAll(&rLog);
-
-    InitClustalOmega(numThreads);
 
     // Initialize sequence and alignment options.
     NewMSeq(&prMSeq);
@@ -30,6 +26,7 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     int numCombinedIterations = rAlnOpts.iNumIterations;
     int maxGuidetreeIterations = rAlnOpts.iMaxGuidetreeIterations;
     int maxHMMIterations = rAlnOpts.iMaxHMMIterations;
+    int numThreads = 1;
     static char *kwlist[] = {
         "seqs",
         "seqtype",
@@ -38,20 +35,24 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
         "num_combined_iterations",
         "max_guidetree_iterations",
         "max_hmm_iterations",
+        "num_threads",
         NULL
     };
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "O!|iOOiii", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "O!|iOOiiii", kwlist,
             &PyDict_Type, &inputDict,
             &seqtype,
             &mbedGuideTree,
             &mbedIteration,
             &numCombinedIterations,
             &maxGuidetreeIterations,
-            &maxHMMIterations))
+            &maxHMMIterations,
+            &numThreads))
         return NULL;
 
     if (PyObject_Not(inputDict))
         return PyDict_New();
+
+    InitClustalOmega(numThreads);
 
     switch (seqtype) {
         case SEQTYPE_DNA:
