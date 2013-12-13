@@ -1,7 +1,7 @@
 from distutils.core import setup, Extension
 
-module = Extension('clustalo',
-                   sources = ['src/clustalo.c'],
+module = Extension('_clustalo',
+                   sources = ['clustalo/clustalo.c'],
                    include_dirs=['/usr/include/clustalo', '/usr/local/include/clustalo'],
                    libraries=['clustalo', 'stdc++', 'gomp'],
                    extra_compile_args=['-fopenmp'])
@@ -9,4 +9,5 @@ module = Extension('clustalo',
 setup(name='clustalo',
       version='0.1',
       description='Python wrapper around libclustalo',
+      packages=['clustalo'],
       ext_modules=[module])

@@ -2,7 +2,7 @@
 #include <clustal-omega.h>
 
 static PyObject *
-clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
+_clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
 {
     mseq_t *prMSeq = NULL;
 
@@ -95,8 +95,9 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     }
 
     // Perform the alignment.
+    int rv;
     Py_BEGIN_ALLOW_THREADS
-    int rv = Align(prMSeq, NULL, &rAlnOpts);
+    rv = Align(prMSeq, NULL, &rAlnOpts);
     Py_END_ALLOW_THREADS
 
     if (rv) {
@@ -116,14 +117,14 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
 }
 
 static PyMethodDef ClustaloMethods[] = {
-    {"clustalo",  (PyCFunction)clustalo_clustalo, METH_VARARGS | METH_KEYWORDS, "Executes clustal omega."},
+    {"clustalo",  (PyCFunction)_clustalo_clustalo, METH_VARARGS | METH_KEYWORDS, "Executes clustal omega."},
     {NULL, NULL, 0, NULL}
 };
 
 PyMODINIT_FUNC
-initclustalo(void)
+init_clustalo(void)
 {
-    PyObject *module = Py_InitModule("clustalo", ClustaloMethods);
+    PyObject *module = Py_InitModule("_clustalo", ClustaloMethods);
     PyModule_AddIntConstant(module, "DNA", SEQTYPE_DNA);
     PyModule_AddIntConstant(module, "RNA", SEQTYPE_RNA);
     PyModule_AddIntConstant(module, "PROTEIN", SEQTYPE_PROTEIN);
