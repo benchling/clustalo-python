@@ -83,7 +83,7 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     // Perform the alignment.
     Py_BEGIN_ALLOW_THREADS
     if (Align(prMSeq, NULL, &rAlnOpts)) {
-        // TODO SET ERROR.
+        PyErr_SetString(PyExc_RuntimeError, "Error while running clustal omega alignment.");
         return NULL;
     }
     Py_END_ALLOW_THREADS
