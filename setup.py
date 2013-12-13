@@ -6,7 +6,7 @@ module = Extension('clustalo',
                    libraries=['clustalo', 'stdc++', 'gomp'],
                    extra_compile_args=['-fopenmp'])
 
-setup(name = 'Clustalo',
-      version = '0.1',
-      description = 'Python wrapper around Clustal Omega',
-      ext_modules = [module])
+setup(name='clustalo',
+      version='0.1',
+      description='Python wrapper around libclustalo',
+      ext_modules=[module])
