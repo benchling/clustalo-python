@@ -122,7 +122,7 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
 
 static PyMethodDef ClustaloMethods[] = {
     {"clustalo",  (PyCFunction)clustalo_clustalo, METH_VARARGS | METH_KEYWORDS,
-     "Runs clustal omega.
+     "Runs clustal omega."
      ""
      "Args:"
      "  data (dict): dictionary of sequence_name => bases"
