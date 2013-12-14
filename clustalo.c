@@ -134,9 +134,9 @@ static PyMethodDef ClustaloMethods[] = {
      "  num_combined_iterations (int): number of (combined guide-tree/HMM) iterations"
      "  max_guidetree_iterations (int): max guide tree iterations within combined iterations"
      "  max_hmm_iterations (int): max HMM iterations within combined iterations"
-     "  num_threads (int): number of threads to use (requires libclustalo compiled with OpenMP)"},
+     "  num_threads (int): number of threads to use (requires libclustalo compiled with OpenMP)"
      ""
-     "Returns dict of sequence_named => aligned_bases ('_' for gaps)"
+     "Returns dict of sequence_named => aligned_bases ('_' for gaps)"},
     {NULL, NULL, 0, NULL}
 };
 
