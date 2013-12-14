@@ -127,7 +127,7 @@ static PyMethodDef ClustaloMethods[] = {
      "Args:"
      "  data (dict): dictionary of sequence_name => bases"
      ""
-     "Kwargs::"
+     "Kwargs:"
      "  seqtype (int): should be one of clustalo.DNA, clustalo.RNA, or clustalo.PROTEIN"
      "  mbed_guide_tree (bool): whether mBed-like clustering guide tree should be used"
      "  mbed_iteration (bool): whether mBed-like clustering iteration should be used"
