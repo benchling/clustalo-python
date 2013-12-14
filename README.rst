@@ -1,7 +1,7 @@
 clustalo-python
 ===============
 
-This is just a simiple Python wrapper around Clustal Omega
+This is just a simple Python wrapper around Clustal Omega
 (http://www.clustal.org/omega/), used internally at Benchling but casually open
 source, if it helps anybody. Also available via::
 
@@ -37,6 +37,6 @@ Usage
   #   seq2: ----CGGA--
 
 At the moment, input sequences are assumed to not be aligned (i.e. there is no
-dealign option). See `clustalo.clustalo.__doc__` or file `clustaslo/clustalo.c`
+dealign option). See ``clustalo.clustalo.__doc__`` or file ``clustaslo/clustalo.c``
 for documentation.
 
