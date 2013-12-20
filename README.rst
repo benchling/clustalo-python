@@ -7,20 +7,19 @@ source, if it helps anybody. Also available via::
 
   pip install clustalo
 
-Requires `libclustalo` installed, version 1.2.0. On Linux, it's recommended you build and
-install it yourself::
+Requires `libclustalo` installed, version 1.2.0. On Linux, it's recommended you
+build and install it yourself::
 
   cd clustal-omega-1.2.0
   ./configure --with-pic --with-openmp
   make && sudo make install
 
-Homebrew (might) be still on 1.1.0, so if on Mac you might need to build it
-yourself also. OpenMP isn't available for clang, so you can either install gcc::
+before installing this package.
 
-  brew tap homebrew/versions
-  brew install gcc48
-
-or just install without it. Just know that `num_threads` won't do anything.
+Support for OSX is not quite there yet, mainly because OpenMP isn't supported
+on clang. Homebrew is still on 1.1.0, so you'll need to compile and install
+clustalo 1.2.0 yourself (`--without-openmp`). You'll also need to modify the
+setup.py file to leave out `gomp` and `-fopenmp` when installing.
 
 Usage
 -----
