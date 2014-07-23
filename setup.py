@@ -1,4 +1,5 @@
 from distutils.core import setup, Extension
+
 import os
 
 OPENMP_DISABLED = os.environ.get('OPENMP_DISABLED', False)
@@ -16,7 +17,7 @@ module = Extension('clustalo',
                    extra_compile_args=extra_compile_args)
 
 setup(name='clustalo',
-      version='0.1',
+      version='0.1.1',
       description='Python wrapper around libclustalo',
       author='Joshua Ma',
       author_email='josh@benchling.com',
