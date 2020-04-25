@@ -76,7 +76,11 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     PyObject *key, *value;
     Py_ssize_t pos = 0;
     while (PyDict_Next(inputDict, &pos, &key, &value)) {
-        char *seq = PyString_AsString(value);
+        #if PY_MAJOR_VERSION >= 3
+            char *seq = PyBytes_AsString(PyUnicode_AsUTF8String(value));
+        #else
+            char *seq = PyString_AsString(value);
+        #endif
         // Sanitize sequence.
         int seqPos;
         for (seqPos = 0; seqPos < (int)strlen(seq); seqPos++) {
@@ -91,7 +95,11 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
                 *res = NUCLEOTIDE_ANY;
             }
         }
-        AddSeq(&prMSeq, PyString_AsString(key), seq);
+        #if PY_MAJOR_VERSION >= 3
+            AddSeq(&prMSeq, PyBytes_AsString(PyUnicode_AsUTF8String(key)), seq);
+        #else
+            AddSeq(&prMSeq, PyString_AsString(key), seq);
+        #endif
     }
     // Can't align with only 1 sequence.
     if (prMSeq->nseqs <= 1) {
@@ -114,11 +122,32 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     int idx;
     for (idx = 0; idx < prMSeq->nseqs; idx++) {
         const char *key = prMSeq->sqinfo[idx].name;
-        PyObject *value = PyString_FromString(prMSeq->seq[idx]);
+        #if PY_MAJOR_VERSION >= 3
+            PyObject *value = PyUnicode_FromString(prMSeq->seq[idx]);
+        #else
+            PyObject *value = PyString_FromString(prMSeq->seq[idx]);
+        #endif
         PyDict_SetItemString(returnDict, key, value);
     }
     return returnDict;
 }
+
+#if PY_MAJOR_VERSION >= 3
+  #define MOD_ERROR_VAL NULL
+  #define MOD_SUCCESS_VAL(val) val
+  #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
+  #define MOD_DEF(ob, name, doc, methods) \
+          static struct PyModuleDef moduledef = { \
+            PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
+          ob = PyModule_Create(&moduledef);
+#else
+  #define MOD_ERROR_VAL
+  #define MOD_SUCCESS_VAL(val)
+  #define MOD_INIT(name) void init##name(void)
+  #define MOD_DEF(ob, name, doc, methods) \
+          ob = Py_InitModule3(name, methods, doc);
+#endif
+
 
 static PyMethodDef ClustaloMethods[] = {
     {"clustalo",  (PyCFunction)clustalo_clustalo, METH_VARARGS | METH_KEYWORDS,
@@ -140,11 +169,16 @@ static PyMethodDef ClustaloMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-PyMODINIT_FUNC
-initclustalo(void)
+MOD_INIT(clustalo)
 {
-    PyObject *module = Py_InitModule("clustalo", ClustaloMethods);
+    PyObject *module;
+    MOD_DEF(module, "clustalo", NULL, ClustaloMethods);
+    if (module == NULL) {
+        return MOD_ERROR_VAL;
+    }
     PyModule_AddIntConstant(module, "DNA", SEQTYPE_DNA);
     PyModule_AddIntConstant(module, "RNA", SEQTYPE_RNA);
     PyModule_AddIntConstant(module, "PROTEIN", SEQTYPE_PROTEIN);
+
+    return MOD_SUCCESS_VAL(module);
 }
