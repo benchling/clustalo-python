@@ -18,8 +18,8 @@ before installing this package.
 
 Support for OSX is not quite there yet, mainly because OpenMP isn't supported
 on clang. Homebrew is still on 1.1.0, so you'll need to compile and install
-clustalo 1.2.0 yourself (`--without-openmp`). You'll also need to modify the
-setup.py file to leave out `gomp` and `-fopenmp` when installing.
+clustalo 1.2.0 yourself (`--without-openmp`). You'll also need to set
+`OPENMP_DISABLED=true` in env vars before running build/install.
 
 Usage
 -----
