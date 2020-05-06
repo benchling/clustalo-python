@@ -39,3 +39,10 @@ At the moment, input sequences are assumed to not be aligned (i.e. there is no
 dealign option). See ``clustalo.clustalo.__doc__`` or file ``clustaslo/clustalo.c``
 for documentation.
 
+Releasing
+---------
+
+Update setup.py to the new desired version number.
+
+Run `make upload` to build and upload to PyPI.
+
