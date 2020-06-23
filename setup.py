@@ -12,7 +12,8 @@ if not OPENMP_DISABLED:
 
 module = Extension('clustalo',
                    sources = ['clustalo.c'],
-                   include_dirs=['/usr/include/clustalo', '/usr/local/include/clustalo'],
+                   include_dirs=['/usr/local/sci/clustalo/current/include/clustalo'],
+                   library_dirs=['/usr/local/sci/clustalo/current/lib'],
                    libraries=libraries,
                    extra_compile_args=extra_compile_args)
 
