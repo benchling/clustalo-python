@@ -27,6 +27,7 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     int maxGuidetreeIterations = rAlnOpts.iMaxGuidetreeIterations;
     int maxHMMIterations = rAlnOpts.iMaxHMMIterations;
     int numThreads = 1;
+    int outOrder = 1;
     static char *kwlist[] = {
         "seqs",
         "seqtype",
@@ -36,9 +37,10 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
         "max_guidetree_iterations",
         "max_hmm_iterations",
         "num_threads",
+        "output_order",
         NULL
     };
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "O!|iOOiiii", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "O!|iOOiiiii", kwlist,
             &PyDict_Type, &inputDict,
             &seqtype,
             &mbedGuideTree,
@@ -46,7 +48,8 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
             &numCombinedIterations,
             &maxGuidetreeIterations,
             &maxHMMIterations,
-            &numThreads))
+            &numThreads,
+            &outOrder))
         return NULL;
 
     if (PyObject_Not(inputDict))
@@ -71,6 +74,7 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     rAlnOpts.iNumIterations = numCombinedIterations;
     rAlnOpts.iMaxGuidetreeIterations = maxGuidetreeIterations;
     rAlnOpts.iMaxHMMIterations = maxHMMIterations;
+    rAlnOpts.iOutputOrder = outOrder;
 
     // Read in sequences from input.
     PyObject *key, *value;
@@ -120,14 +124,33 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     // Return the aligned results in a dict.
     PyObject *returnDict = PyDict_New();
     int idx;
-    for (idx = 0; idx < prMSeq->nseqs; idx++) {
-        const char *key = prMSeq->sqinfo[idx].name;
-        #if PY_MAJOR_VERSION >= 3
+    if (outOrder == 1){
+        for (idx = 0; idx < prMSeq->nseqs; idx++) {
+            //printf("NAME OF SEQUENCE: %s, %i \n", prMSeq->sqinfo[prMSeq->tree_order[idx]].name, prMSeq->tree_order[idx]);
+            const char *key = prMSeq->sqinfo[prMSeq->tree_order[idx]].name;
+
+#if PY_MAJOR_VERSION >= 3
+            PyObject *value = PyUnicode_FromString(prMSeq->seq[prMSeq->tree_order[idx]]);
+#else
+            PyObject *value = PyString_FromString(prMSeq->seq[prMSeq->tree_order[idx]]);
+
+#endif
+            PyDict_SetItemString(returnDict, key, value);
+        }
+
+
+    }
+    else {
+        for (idx = 0; idx < prMSeq->nseqs; idx++) {
+            const char *key = prMSeq->sqinfo[idx].name;
+
+#if PY_MAJOR_VERSION >= 3
             PyObject *value = PyUnicode_FromString(prMSeq->seq[idx]);
-        #else
+#else
             PyObject *value = PyString_FromString(prMSeq->seq[idx]);
-        #endif
-        PyDict_SetItemString(returnDict, key, value);
+#endif
+            PyDict_SetItemString(returnDict, key, value);
+        }
     }
     return returnDict;
 }

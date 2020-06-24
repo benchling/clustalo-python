@@ -18,7 +18,7 @@ module = Extension('clustalo',
                    extra_compile_args=extra_compile_args)
 
 setup(name='clustalo',
-      version='0.1.2',
+      version='0.1.3',
       description='Python wrapper around libclustalo',
       author='Benchling Engineering',
       author_email='eng@benchling.com',
