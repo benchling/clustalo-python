@@ -110,6 +110,7 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     }
 
     // allocating the tree_order of prMSeq is enough to capture the tree_order information
+    // Segfaults if only 2 sequences though (the program refuses to calculate a tree)
     if (prMSeq->nseqs > 2 && outOrder == 1) {
         prMSeq->tree_order = (int *) CKMALLOC(prMSeq->nseqs * sizeof(int));
     }
