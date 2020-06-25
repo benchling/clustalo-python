@@ -75,12 +75,6 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     rAlnOpts.iMaxGuidetreeIterations = maxGuidetreeIterations;
     rAlnOpts.iMaxHMMIterations = maxHMMIterations;
 
-    // allocating the tree_order of prMSeq is enough to capture the tree_order information
-    if (outOrder == 1) {
-        prMSeq->tree_order = (int *)CKMALLOC(prMSeq->nseqs * sizeof(int));
-    }
-    rAlnOpts.iOutputOrder = outOrder;
-
     // Read in sequences from input.
     PyObject *key, *value;
     Py_ssize_t pos = 0;
@@ -115,6 +109,14 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
         return PyDict_Copy(inputDict);
     }
 
+    // allocating the tree_order of prMSeq is enough to capture the tree_order information
+    if (prMSeq->nseqs > 2 && outOrder == 1) {
+        prMSeq->tree_order = (int *) CKMALLOC(prMSeq->nseqs * sizeof(int));
+    }
+    else {
+        outOrder = 0;
+    }
+
     // Perform the alignment.
     int rv;
     Py_BEGIN_ALLOW_THREADS
@@ -131,7 +133,6 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     int idx;
     if (outOrder == 1){
         for (idx = 0; idx < prMSeq->nseqs; idx++) {
-            //printf("NAME OF SEQUENCE: %s, %i \n", prMSeq->sqinfo[prMSeq->tree_order[idx]].name, prMSeq->tree_order[idx]);
             const char *key = prMSeq->sqinfo[prMSeq->tree_order[idx]].name;
 #if PY_MAJOR_VERSION >= 3
             PyObject *value = PyUnicode_FromString(prMSeq->seq[prMSeq->tree_order[idx]]);
