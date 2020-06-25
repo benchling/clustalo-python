@@ -188,7 +188,7 @@ static PyMethodDef ClustaloMethods[] = {
      "  max_guidetree_iterations (int): max guide tree iterations within combined iterations\n"
      "  max_hmm_iterations (int): max HMM iterations within combined iterations\n"
      "  num_threads (int): number of threads to use (requires libclustalo compiled with OpenMP)\n"
-     "  output_order (int): return the alignment with either the input order (0) or alignment tree order (1)\n"
+     "  output_order (int): return the alignment with either the input order (0) or alignment tree order (1). Only works on >Python 3.6, where dictionaries are ordered.\n"
      "\n"
      "Returns dict of sequence_names:aligned_bases ('-' for gaps)\n"},
     {NULL, NULL, 0, NULL}
