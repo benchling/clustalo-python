@@ -1,3 +1,7 @@
+### Beowulfey's notes:
+
+I've forked this repository in order to add the ability to return the sequences of the alignment in the aligned tree order. Although there isn't an option in the clustalo API I figured out how it knows whether to do so (it's dependendent on whether memory is allocated for the tree order, I guess). Thanks to ordered dictionaries in Python 3 this actually works, too! 
+
 clustalo-python
 ===============
 
