@@ -27,6 +27,7 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     int maxGuidetreeIterations = rAlnOpts.iMaxGuidetreeIterations;
     int maxHMMIterations = rAlnOpts.iMaxHMMIterations;
     int numThreads = 1;
+    int outOrder = 1;
     static char *kwlist[] = {
         "seqs",
         "seqtype",
@@ -36,9 +37,10 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
         "max_guidetree_iterations",
         "max_hmm_iterations",
         "num_threads",
+        "output_order",
         NULL
     };
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "O!|iOOiiii", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "O!|iOOiiiii", kwlist,
             &PyDict_Type, &inputDict,
             &seqtype,
             &mbedGuideTree,
@@ -46,7 +48,8 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
             &numCombinedIterations,
             &maxGuidetreeIterations,
             &maxHMMIterations,
-            &numThreads))
+            &numThreads,
+            &outOrder))
         return NULL;
 
     if (PyObject_Not(inputDict))
@@ -106,6 +109,15 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
         return PyDict_Copy(inputDict);
     }
 
+    // allocating the tree_order of prMSeq is enough to capture the tree_order information
+    // Segfaults if only 2 sequences though (the program refuses to calculate a tree)
+    if (prMSeq->nseqs > 2 && outOrder == 1) {
+        prMSeq->tree_order = (int *) CKMALLOC(prMSeq->nseqs * sizeof(int));
+    }
+    else {
+        outOrder = 0;
+    }
+
     // Perform the alignment.
     int rv;
     Py_BEGIN_ALLOW_THREADS
@@ -120,18 +132,30 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
     // Return the aligned results in a dict.
     PyObject *returnDict = PyDict_New();
     int idx;
-    for (idx = 0; idx < prMSeq->nseqs; idx++) {
-        const char *key = prMSeq->sqinfo[idx].name;
-        #if PY_MAJOR_VERSION >= 3
+    if (outOrder == 1){
+        for (idx = 0; idx < prMSeq->nseqs; idx++) {
+            const char *key = prMSeq->sqinfo[prMSeq->tree_order[idx]].name;
+#if PY_MAJOR_VERSION >= 3
+            PyObject *value = PyUnicode_FromString(prMSeq->seq[prMSeq->tree_order[idx]]);
+#else
+            PyObject *value = PyString_FromString(prMSeq->seq[prMSeq->tree_order[idx]]);
+#endif
+            PyDict_SetItemString(returnDict, key, value);
+        }
+    }
+    else {
+        for (idx = 0; idx < prMSeq->nseqs; idx++) {
+            const char *key = prMSeq->sqinfo[idx].name;
+#if PY_MAJOR_VERSION >= 3
             PyObject *value = PyUnicode_FromString(prMSeq->seq[idx]);
-        #else
+#else
             PyObject *value = PyString_FromString(prMSeq->seq[idx]);
-        #endif
-        PyDict_SetItemString(returnDict, key, value);
+#endif
+            PyDict_SetItemString(returnDict, key, value);
+        }
     }
     return returnDict;
 }
-
 #if PY_MAJOR_VERSION >= 3
   #define MOD_ERROR_VAL NULL
   #define MOD_SUCCESS_VAL(val) val
@@ -151,21 +175,22 @@ clustalo_clustalo(PyObject *self, PyObject *args, PyObject *keywds)
 
 static PyMethodDef ClustaloMethods[] = {
     {"clustalo",  (PyCFunction)clustalo_clustalo, METH_VARARGS | METH_KEYWORDS,
-     "Runs clustal omega."
-     ""
-     "Args:"
-     "  data (dict): dictionary of sequence_name => bases"
-     ""
-     "Kwargs:"
-     "  seqtype (int): should be one of clustalo.DNA, clustalo.RNA, or clustalo.PROTEIN"
-     "  mbed_guide_tree (bool): whether mBed-like clustering guide tree should be used"
-     "  mbed_iteration (bool): whether mBed-like clustering iteration should be used"
-     "  num_combined_iterations (int): number of (combined guide-tree/HMM) iterations"
-     "  max_guidetree_iterations (int): max guide tree iterations within combined iterations"
-     "  max_hmm_iterations (int): max HMM iterations within combined iterations"
-     "  num_threads (int): number of threads to use (requires libclustalo compiled with OpenMP)"
-     ""
-     "Returns dict of sequence_named => aligned_bases ('_' for gaps)"},
+     "Runs clustal omega.\n"
+     "\n"
+     "Args:\n"
+     "  data (dict): dictionary of sequence_name => bases\n"
+     "\n"
+     "Kwargs:\n"
+     "  seqtype (int): should be one of clustalo.DNA, clustalo.RNA, or clustalo.PROTEIN\n"
+     "  mbed_guide_tree (bool): whether mBed-like clustering guide tree should be used\n"
+     "  mbed_iteration (bool): whether mBed-like clustering iteration should be used\n"
+     "  num_combined_iterations (int): number of (combined guide-tree/HMM) iterations\n"
+     "  max_guidetree_iterations (int): max guide tree iterations within combined iterations\n"
+     "  max_hmm_iterations (int): max HMM iterations within combined iterations\n"
+     "  num_threads (int): number of threads to use (requires libclustalo compiled with OpenMP)\n"
+     "  output_order (int): return the alignment with either the input order (0) or alignment tree order (1). Only works on >Python 3.6, where dictionaries are ordered.\n"
+     "\n"
+     "Returns dict of sequence_names:aligned_bases ('-' for gaps)\n"},
     {NULL, NULL, 0, NULL}
 };
 

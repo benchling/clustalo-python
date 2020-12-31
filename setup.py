@@ -12,12 +12,13 @@ if not OPENMP_DISABLED:
 
 module = Extension('clustalo',
                    sources = ['clustalo.c'],
-                   include_dirs=['/usr/include/clustalo', '/usr/local/include/clustalo'],
+                   include_dirs=['/usr/local/sci/clustalo/v1.2.4/include/clustalo'],
+                   library_dirs=['/usr/local/sci/clustalo/v1.2.4/lib'],
                    libraries=libraries,
                    extra_compile_args=extra_compile_args)
 
 setup(name='clustalo',
-      version='0.1.2',
+      version='0.1.3',
       description='Python wrapper around libclustalo',
       author='Benchling Engineering',
       author_email='eng@benchling.com',

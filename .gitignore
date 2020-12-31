@@ -1,3 +1,5 @@
+venv
+.idea
 *.py[cod]
 
 # C extensions
