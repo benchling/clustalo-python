@@ -9,9 +9,6 @@ from setuptools import setup, Extension
 OPENMP_DISABLED = os.environ.get('OPENMP_DISABLED', False)
 libraries = ['clustalo', 'stdc++']
 
-# if not OPENMP_DISABLED:
-#     libraries.append('gomp')
-
 
 class BuildFlags:
     _tools_formulae = {
@@ -60,6 +57,7 @@ flags = BuildFlags()
 module = Extension('clustalo',
                    sources=['clustalo.c'],
                    include_dirs=['/usr/include/clustalo', '/usr/local/include/clustalo'],
+                   library_dirs=['/usr/local/lib'],
                    libraries=libraries,
                    extra_compile_args=flags.compiler,
                    extra_link_args=flags.linker)
